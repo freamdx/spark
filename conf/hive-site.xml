@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<configuration>
+  <property>
+    <name>hive.server2.thrift.port</name>
+    <value>20000</value>
+  </property>
+
+  <property>
+    <name>hive.server2.authentication</name>
+    <value>NONE</value>
+    <description>[NOSASL, NONE, LDAP, KERBEROS, PAM, CUSTOM]</description>
+  </property>
+  <property>
+    <name>hive.server2.custom.authentication.class</name>
+    <value>org.apache.hive.service.auth.gaia.GaiaDBAuth</value>
+  </property>
+  <property>
+    <name>spark.auth.zk.quorum</name>
+    <value>localhost</value>
+    <description>[spark.hbase]</description>
+  </property>
+  <property>
+    <name>spark.auth.catalog</name>
+    <value>gaia</value>
+    <description>[spark.hbase.catalog]</description>
+  </property>
+  <property>
+    <name>spark.auth.group.key</name>
+    <value>GROUP</value>
+  </property>
+  <property>
+    <name>spark.auth.group</name>
+    <value>stdb</value>
+  </property>
+</configuration>

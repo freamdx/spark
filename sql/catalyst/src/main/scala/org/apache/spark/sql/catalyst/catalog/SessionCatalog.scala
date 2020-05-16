@@ -451,6 +451,14 @@ class SessionCatalog(
     externalCatalog.loadTable(db, table, loadPath, isOverwrite, isSrcLocal)
   }
 
+  def truncateTable(name: TableIdentifier): Unit = {
+    val db = formatDatabaseName(name.database.getOrElse(getCurrentDatabase))
+    val table = formatTableName(name.table)
+    requireDbExists(db)
+    requireTableExists(TableIdentifier(table, Some(db)))
+    externalCatalog.truncateTable(db, table)
+  }
+
   /**
    * Load files stored in given path into the partition of an existing metastore table.
    * If no database is specified, assume the table is in the current database.

@@ -1086,10 +1086,14 @@ object SparkSession extends Logging {
   private val HIVE_SESSION_STATE_BUILDER_CLASS_NAME =
     "org.apache.spark.sql.hive.HiveSessionStateBuilder"
 
+  private val GAIA_SESSION_STATE_BUILDER_CLASS_NAME =
+    "org.apache.spark.sql.gaia.GaiaSessionStateBuilder"
+
   private def sessionStateClassName(conf: SparkConf): String = {
     conf.get(CATALOG_IMPLEMENTATION) match {
       case "hive" => HIVE_SESSION_STATE_BUILDER_CLASS_NAME
       case "in-memory" => classOf[SessionStateBuilder].getCanonicalName
+      case "geomesa" => GAIA_SESSION_STATE_BUILDER_CLASS_NAME
     }
   }
 

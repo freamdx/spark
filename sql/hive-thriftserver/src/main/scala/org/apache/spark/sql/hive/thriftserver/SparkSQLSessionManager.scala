@@ -26,11 +26,11 @@ import org.apache.hive.service.cli.SessionHandle
 import org.apache.hive.service.cli.session.SessionManager
 import org.apache.hive.service.cli.thrift.TProtocolVersion
 import org.apache.hive.service.server.HiveServer2
-
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SQLTypes}
 import org.apache.spark.sql.hive.HiveUtils
 import org.apache.spark.sql.hive.thriftserver.ReflectionUtils._
 import org.apache.spark.sql.hive.thriftserver.server.SparkSQLOperationManager
+import org.apache.spark.sql.internal.StaticSQLConf
 
 
 private[hive] class SparkSQLSessionManager(hiveServer: HiveServer2, sqlContext: SQLContext)
@@ -61,7 +61,11 @@ private[hive] class SparkSQLSessionManager(hiveServer: HiveServer2, sqlContext: 
     val ctx = if (sqlContext.conf.hiveThriftServerSingleSession) {
       sqlContext
     } else {
-      sqlContext.newSession()
+      val ctx = sqlContext.newSession()
+      if (ctx.sparkSession.conf.get(StaticSQLConf.CATALOG_IMPLEMENTATION.key).equals("geomesa")) {
+        SQLTypes.init(sqlContext)
+      }
+      ctx
     }
     ctx.setConf(HiveUtils.FAKE_HIVE_VERSION.key, HiveUtils.builtinHiveVersion)
     if (sessionConf != null && sessionConf.containsKey("use:database")) {

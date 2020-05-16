@@ -159,6 +159,12 @@ class ExternalCatalogWithListener(delegate: ExternalCatalog)
     delegate.loadTable(db, table, loadPath, isOverwrite, isSrcLocal)
   }
 
+  override def truncateTable(
+      db: String,
+      table: String): Unit = {
+    delegate.truncateTable(db, table)
+  }
+
   override def loadPartition(
       db: String,
       table: String,
