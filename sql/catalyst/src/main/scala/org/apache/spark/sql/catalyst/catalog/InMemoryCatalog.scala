@@ -350,6 +350,12 @@ class InMemoryCatalog(
     throw new UnsupportedOperationException("loadTable is not implemented")
   }
 
+  override def truncateTable(
+      db: String,
+      table: String): Unit = {
+    throw new UnsupportedOperationException("truncateTable is not implemented")
+  }
+
   override def loadPartition(
       db: String,
       table: String,

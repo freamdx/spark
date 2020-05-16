@@ -19,17 +19,12 @@ package org.apache.spark.sql.catalyst.parser
 
 import java.sql.{Date, Timestamp}
 import java.util.Locale
+
 import javax.xml.bind.DatatypeConverter
-
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
-
-import org.antlr.v4.runtime.{ParserRuleContext, Token}
 import org.antlr.v4.runtime.tree.{ParseTree, RuleNode, TerminalNode}
-
+import org.antlr.v4.runtime.{ParserRuleContext, Token}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.AnalysisException
-import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.catalyst.analysis._
 import org.apache.spark.sql.catalyst.catalog.CatalogStorageFormat
 import org.apache.spark.sql.catalyst.expressions._
@@ -37,10 +32,15 @@ import org.apache.spark.sql.catalyst.expressions.aggregate.{First, Last}
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser._
 import org.apache.spark.sql.catalyst.plans._
 import org.apache.spark.sql.catalyst.plans.logical._
+import org.apache.spark.sql.catalyst.{FunctionIdentifier, TableIdentifier}
 import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.jts.JTSTypes
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.CalendarInterval
 import org.apache.spark.util.random.RandomSampler
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * The AstBuilder converts an ANTLR4 ParseTree into a catalyst Expression, LogicalPlan or
@@ -1771,6 +1771,13 @@ class AstBuilder(conf: SQLConf) extends SqlBaseBaseVisitor[AnyRef] with Logging 
       case ("decimal", precision :: Nil) => DecimalType(precision.getText.toInt, 0)
       case ("decimal", precision :: scale :: Nil) =>
         DecimalType(precision.getText.toInt, scale.getText.toInt)
+      case ("point", Nil) => JTSTypes.PointTypeInstance
+      case ("linestring", Nil) => JTSTypes.LineStringTypeInstance
+      case ("polygon", Nil) => JTSTypes.PolygonTypeInstance
+      case ("multipoint", Nil) => JTSTypes.MultiPointTypeInstance
+      case ("multilinestring", Nil) => JTSTypes.MultiLineStringTypeInstance
+      case ("multipolygon", Nil) => JTSTypes.MultipolygonTypeInstance
+      case ("geometry", Nil) => JTSTypes.GeometryTypeInstance
       case (dt, params) =>
         val dtStr = if (params.nonEmpty) s"$dt(${params.mkString(",")})" else dt
         throw new ParseException(s"DataType $dtStr is not supported.", ctx)

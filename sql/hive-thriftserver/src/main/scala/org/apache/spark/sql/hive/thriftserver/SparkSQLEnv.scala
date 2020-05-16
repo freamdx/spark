@@ -17,13 +17,11 @@
 
 package org.apache.spark.sql.hive.thriftserver
 
-import java.io.PrintStream
-
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.{SparkSession, SQLContext}
-import org.apache.spark.sql.hive.{HiveExternalCatalog, HiveUtils}
+import org.apache.spark.sql.internal.StaticSQLConf
+import org.apache.spark.sql.{SQLContext, SQLTypes, SparkSession}
 import org.apache.spark.util.Utils
+import org.apache.spark.{SparkConf, SparkContext}
 
 /** A singleton object for the master program. The slaves should not access this. */
 private[hive] object SparkSQLEnv extends Logging {
@@ -45,21 +43,24 @@ private[hive] object SparkSQLEnv extends Logging {
       sparkConf
         .setAppName(maybeAppName.getOrElse(s"SparkSQL::${Utils.localHostName()}"))
 
-      val sparkSession = SparkSession.builder.config(sparkConf).enableHiveSupport().getOrCreate()
+      val sparkSession = SparkSession.builder.config(sparkConf).getOrCreate()
       sparkContext = sparkSession.sparkContext
       sqlContext = sparkSession.sqlContext
+      if (sparkSession.conf.get(StaticSQLConf.CATALOG_IMPLEMENTATION.key).equals("geomesa")) {
+        SQLTypes.init(sqlContext)
+      }
 
       // SPARK-29604: force initialization of the session state with the Spark class loader,
       // instead of having it happen during the initialization of the Hive client (which may use a
       // different class loader).
       sparkSession.sessionState
 
-      val metadataHive = sparkSession
-        .sharedState.externalCatalog.unwrapped.asInstanceOf[HiveExternalCatalog].client
-      metadataHive.setOut(new PrintStream(System.out, true, "UTF-8"))
-      metadataHive.setInfo(new PrintStream(System.err, true, "UTF-8"))
-      metadataHive.setError(new PrintStream(System.err, true, "UTF-8"))
-      sparkSession.conf.set(HiveUtils.FAKE_HIVE_VERSION.key, HiveUtils.builtinHiveVersion)
+//      val metadataHive = sparkSession
+//        .sharedState.externalCatalog.unwrapped.asInstanceOf[HiveExternalCatalog].client
+//      metadataHive.setOut(new PrintStream(System.out, true, "UTF-8"))
+//      metadataHive.setInfo(new PrintStream(System.err, true, "UTF-8"))
+//      metadataHive.setError(new PrintStream(System.err, true, "UTF-8"))
+//      sparkSession.conf.set(HiveUtils.FAKE_HIVE_VERSION.key, HiveUtils.builtinHiveVersion)
     }
   }
 

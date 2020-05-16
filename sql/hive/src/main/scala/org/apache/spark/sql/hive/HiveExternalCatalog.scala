@@ -22,23 +22,16 @@ import java.lang.reflect.InvocationTargetException
 import java.util
 import java.util.Locale
 
-import scala.collection.mutable
-import scala.util.control.NonFatal
-
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.hive.ql.metadata.HiveException
-import org.apache.thrift.TException
-
-import org.apache.spark.{SparkConf, SparkException}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.analysis.TableAlreadyExistsException
-import org.apache.spark.sql.catalyst.catalog._
 import org.apache.spark.sql.catalyst.catalog.ExternalCatalogUtils._
+import org.apache.spark.sql.catalyst.catalog._
 import org.apache.spark.sql.catalyst.expressions._
-import org.apache.spark.sql.catalyst.plans.logical.ColumnStat
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 import org.apache.spark.sql.execution.command.DDLUtils
 import org.apache.spark.sql.execution.datasources.{PartitioningUtils, SourceOptions}
@@ -46,6 +39,11 @@ import org.apache.spark.sql.hive.client.HiveClient
 import org.apache.spark.sql.internal.HiveSerDe
 import org.apache.spark.sql.internal.StaticSQLConf._
 import org.apache.spark.sql.types.{DataType, StructType}
+import org.apache.spark.{SparkConf, SparkException}
+import org.apache.thrift.TException
+
+import scala.collection.mutable
+import scala.util.control.NonFatal
 
 
 /**
@@ -55,9 +53,9 @@ import org.apache.spark.sql.types.{DataType, StructType}
 private[spark] class HiveExternalCatalog(conf: SparkConf, hadoopConf: Configuration)
   extends ExternalCatalog with Logging {
 
+  import CatalogTableType._
   import CatalogTypes.TablePartitionSpec
   import HiveExternalCatalog._
-  import CatalogTableType._
 
   /**
    * A Hive client used to interact with the metastore.
@@ -847,6 +845,12 @@ private[spark] class HiveExternalCatalog(conf: SparkConf, hadoopConf: Configurat
       s"$db.$table",
       isOverwrite,
       isSrcLocal)
+  }
+
+  override def truncateTable(
+      db: String,
+      table: String): Unit = withClient {
+    throw new UnsupportedOperationException("truncateTable is not implemented")
   }
 
   override def loadPartition(

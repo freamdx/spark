@@ -18,8 +18,8 @@
 package org.apache.spark.sql.catalyst.analysis
 
 import scala.util.control.NonFatal
-
 import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.ScalaUDF
 import org.apache.spark.sql.catalyst.plans.logical.{LocalRelation, LogicalPlan}
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.internal.SQLConf
@@ -64,7 +64,8 @@ case class ResolveInlineTables(conf: SQLConf) extends Rule[LogicalPlan] with Cas
     table.rows.foreach { row =>
       row.foreach { e =>
         // Note that nondeterministic expressions are not supported since they are not foldable.
-        if (!e.resolved || !e.foldable) {
+        // Support insert with UDF field.UDF have its own folding rule
+        if (!e.resolved || (!e.foldable && !e.isInstanceOf[ScalaUDF])) {
           e.failAnalysis(s"cannot evaluate expression ${e.sql} in inline table definition")
         }
       }

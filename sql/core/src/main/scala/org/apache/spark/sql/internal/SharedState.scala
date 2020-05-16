@@ -178,11 +178,13 @@ object SharedState extends Logging {
   }
 
   private val HIVE_EXTERNAL_CATALOG_CLASS_NAME = "org.apache.spark.sql.hive.HiveExternalCatalog"
+  private val GAIA_EXTERNAL_CATALOG_CLASS_NAME = "org.apache.spark.sql.gaia.GaiaExternalCatalog"
 
   private def externalCatalogClassName(conf: SparkConf): String = {
     conf.get(CATALOG_IMPLEMENTATION) match {
       case "hive" => HIVE_EXTERNAL_CATALOG_CLASS_NAME
       case "in-memory" => classOf[InMemoryCatalog].getCanonicalName
+      case "geomesa" => GAIA_EXTERNAL_CATALOG_CLASS_NAME
     }
   }
 

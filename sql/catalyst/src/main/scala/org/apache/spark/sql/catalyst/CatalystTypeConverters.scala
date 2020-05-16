@@ -140,7 +140,10 @@ object CatalystTypeConverters {
   private case class UDTConverter[A >: Null](
       udt: UserDefinedType[A]) extends CatalystTypeConverter[A, A, Any] {
     // toCatalyst (it calls toCatalystImpl) will do null check.
-    override def toCatalystImpl(scalaValue: A): Any = udt.serialize(scalaValue)
+    override def toCatalystImpl(scalaValue: A): Any = scalaValue match {
+      case s: String =>
+      case _ => udt.serialize (scalaValue)
+    }
 
     override def toScala(catalystValue: Any): A = {
       if (catalystValue == null) null else udt.deserialize(catalystValue)

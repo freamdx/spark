@@ -231,6 +231,7 @@ case class AlterTableAddColumnsCommand(
         // come in here.
         case _: JsonFileFormat | _: CSVFileFormat | _: ParquetFileFormat =>
         case s if s.getClass.getCanonicalName.endsWith("OrcFileFormat") =>
+        case s if s.getClass.getCanonicalName.endsWith("GeoMesaDataSource") =>
         case s =>
           throw new AnalysisException(
             s"""
@@ -410,8 +411,12 @@ case class TruncateTableCommand(
     val tableIdentWithDB = table.identifier.quotedString
 
     if (table.tableType == CatalogTableType.EXTERNAL) {
-      throw new AnalysisException(
-        s"Operation not allowed: TRUNCATE TABLE on external tables: $tableIdentWithDB")
+      if (!table.provider.isDefined || !table.provider.get.equalsIgnoreCase("geomesa")) {
+        throw new AnalysisException(
+          s"Operation not allowed: TRUNCATE TABLE on external tables: $tableIdentWithDB")
+      }
+      catalog.truncateTable(tableName)
+      return Seq.empty[Row]
     }
     if (table.tableType == CatalogTableType.VIEW) {
       throw new AnalysisException(
