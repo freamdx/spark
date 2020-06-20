@@ -20,7 +20,7 @@ package org.apache.spark.sql.hive.execution
 import java.io.File
 import java.net.URI
 import java.sql.Timestamp
-import java.util.{Locale, TimeZone}
+import java.util.Locale
 
 import scala.util.Try
 
@@ -47,9 +47,6 @@ case class TestData(a: Int, b: String)
  * included in the hive distribution.
  */
 class HiveQuerySuite extends HiveComparisonTest with SQLTestUtils with BeforeAndAfter {
-  private val originalTimeZone = TimeZone.getDefault
-  private val originalLocale = Locale.getDefault
-
   import org.apache.spark.sql.hive.test.TestHive.implicits._
 
   private val originalCrossJoinEnabled = TestHive.conf.crossJoinEnabled
@@ -59,10 +56,6 @@ class HiveQuerySuite extends HiveComparisonTest with SQLTestUtils with BeforeAnd
   override def beforeAll(): Unit = {
     super.beforeAll()
     TestHive.setCacheTables(true)
-    // Timezone is fixed to America/Los_Angeles for those timezone sensitive tests (timestamp_*)
-    TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
-    // Add Locale setting
-    Locale.setDefault(Locale.US)
     // Ensures that cross joins are enabled so that we can test them
     TestHive.setConf(SQLConf.CROSS_JOINS_ENABLED, true)
   }
@@ -70,8 +63,6 @@ class HiveQuerySuite extends HiveComparisonTest with SQLTestUtils with BeforeAnd
   override def afterAll(): Unit = {
     try {
       TestHive.setCacheTables(false)
-      TimeZone.setDefault(originalTimeZone)
-      Locale.setDefault(originalLocale)
       sql("DROP TEMPORARY FUNCTION IF EXISTS udtf_count2")
       TestHive.setConf(SQLConf.CROSS_JOINS_ENABLED, originalCrossJoinEnabled)
     } finally {
@@ -565,32 +556,26 @@ class HiveQuerySuite extends HiveComparisonTest with SQLTestUtils with BeforeAnd
     assert(1 == res.getDouble(0))
   }
 
-  createQueryTest("timestamp cast #2",
-    "SELECT CAST(CAST(1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
-  test("timestamp cast #3") {
-    val res = sql("SELECT CAST(CAST(1200 AS TIMESTAMP) AS INT) FROM src LIMIT 1").collect().head
-    assert(1200 == res.getInt(0))
-  }
-
-  createQueryTest("timestamp cast #4",
-    "SELECT CAST(CAST(1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
-
-  test("timestamp cast #5") {
+  test("timestamp cast #2") {
     val res = sql("SELECT CAST(CAST(-1 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1").collect().head
     assert(-1 == res.get(0))
   }
 
-  createQueryTest("timestamp cast #6",
+  createQueryTest("timestamp cast #3",
+    "SELECT CAST(CAST(1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
+
+  createQueryTest("timestamp cast #4",
     "SELECT CAST(CAST(-1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
 
-  test("timestamp cast #7") {
+  test("timestamp cast #5") {
+    val res = sql("SELECT CAST(CAST(1200 AS TIMESTAMP) AS INT) FROM src LIMIT 1").collect().head
+    assert(1200 == res.getInt(0))
+  }
+
+  test("timestamp cast #6") {
     val res = sql("SELECT CAST(CAST(-1200 AS TIMESTAMP) AS INT) FROM src LIMIT 1").collect().head
     assert(-1200 == res.getInt(0))
   }
-
-  createQueryTest("timestamp cast #8",
-    "SELECT CAST(CAST(-1.2 AS TIMESTAMP) AS DOUBLE) FROM src LIMIT 1")
 
   createQueryTest("select null from table",
     "SELECT null FROM src LIMIT 1")
