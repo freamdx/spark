@@ -459,9 +459,10 @@ package object config {
       .timeConf(TimeUnit.MILLISECONDS)
       .createWithDefaultString("60s")
 
-  private[spark] val STORAGE_BLOCKMANAGER_SLAVE_TIMEOUT =
-    ConfigBuilder("spark.storage.blockManagerSlaveTimeoutMs")
+  private[spark] val STORAGE_BLOCKMANAGER_HEARTBEAT_TIMEOUT =
+    ConfigBuilder("spark.storage.blockManagerHeartbeatTimeoutMs")
       .version("0.7.0")
+      .withAlternative("spark.storage.blockManagerSlaveTimeoutMs")
       .timeConf(TimeUnit.MILLISECONDS)
       .createWithDefaultString(Network.NETWORK_TIMEOUT.defaultValueString)
 
@@ -1840,6 +1841,17 @@ package object config {
         "on the conf values of spark.executor.cores and spark.task.cpus minimum 1.")
       .version("3.0.0")
       .timeConf(TimeUnit.MILLISECONDS)
+      .createOptional
+
+  private[spark] val EXECUTOR_DECOMMISSION_KILL_INTERVAL =
+    ConfigBuilder("spark.executor.decommission.killInterval")
+      .doc("Duration after which a decommissioned executor will be killed forcefully." +
+        "This config is useful for cloud environments where we know in advance when " +
+        "an executor is going to go down after decommissioning signal i.e. around 2 mins " +
+        "in aws spot nodes, 1/2 hrs in spot block nodes etc. This config is currently " +
+        "used to decide what tasks running on decommission executors to speculate.")
+      .version("3.1.0")
+      .timeConf(TimeUnit.SECONDS)
       .createOptional
 
   private[spark] val STAGING_DIR = ConfigBuilder("spark.yarn.stagingDir")
