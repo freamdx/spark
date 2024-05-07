@@ -58,6 +58,15 @@ public class TableSchema {
     this(schema.getFieldSchemas());
   }
 
+  public TableSchema(List<FieldSchema> fieldSchemas, List<String> originTypes) {
+    int pos = 1;
+    for (FieldSchema field : fieldSchemas) {
+      String originType = originTypes.get(pos - 1);
+      String sqlType = UDTUtil.existsType(originType) ? UDTUtil.getType(originType) : field.getType();
+      columns.add(new ColumnDescriptor(field.getName(), field.getComment(), new TypeDescriptor(sqlType), pos++));
+    }
+  }
+
   public List<ColumnDescriptor> getColumnDescriptors() {
     return new ArrayList<ColumnDescriptor>(columns);
   }

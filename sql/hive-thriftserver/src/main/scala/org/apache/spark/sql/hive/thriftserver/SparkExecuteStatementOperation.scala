@@ -384,6 +384,6 @@ object SparkExecuteStatementOperation {
       }
       new FieldSchema(field.name, attrTypeString, field.getComment.getOrElse(""))
     }
-    new TableSchema(schema.asJava)
+    new TableSchema(schema.asJava, structType.map { field => field.dataType.simpleString }.asJava)
   }
 }

@@ -28,6 +28,7 @@ import org.apache.spark.sql.catalyst.util.IntervalUtils.{durationToMicros, perio
 import org.apache.spark.sql.execution.command.{DescribeCommandBase, ExecutedCommandExec, ShowTablesCommand, ShowViewsCommand}
 import org.apache.spark.sql.execution.datasources.v2.{DescribeTableExec, ShowTablesExec}
 import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.CalendarInterval
 
@@ -130,6 +131,8 @@ object HiveResult {
         HIVE_STYLE,
         startField,
         endField)
+    case (geom: org.locationtech.jts.geom.Geometry, GeometryUDT) =>
+      org.apache.sedona.common.utils.GeomUtils.getWKT(geom)
     case (other, _: UserDefinedType[_]) => other.toString
   }
 }
