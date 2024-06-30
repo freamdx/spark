@@ -25,6 +25,7 @@ import org.apache.avro.Schema.Type._
 
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.sql.catalyst.parser.CatalystSqlParser
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.types.Decimal.minBytesForPrecision
 
@@ -74,6 +75,7 @@ object SchemaConverters {
         // For FIXED type, if the precision requires more bytes than fixed size, the logical
         // type will be null, which is handled by Avro library.
         case d: Decimal => SchemaType(DecimalType(d.getPrecision, d.getScale), nullable = false)
+        case g: GeometryLogicalType => SchemaType(GeometryUDT, nullable = true)
         case _ => SchemaType(BinaryType, nullable = false)
       }
 
@@ -221,6 +223,9 @@ object SchemaConverters {
         val dtIntervalType = builder.longType()
         dtIntervalType.addProp(CATALYST_TYPE_PROP_NAME, dt.typeName)
         dtIntervalType
+
+      // GeometryUDT
+      case GeometryUDT => GeometryLogicalType.getSchema()
 
       // This should never happen.
       case other => throw new IncompatibleSchemaException(s"Unexpected type $other.")

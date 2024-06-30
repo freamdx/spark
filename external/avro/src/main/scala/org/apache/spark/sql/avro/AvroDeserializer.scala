@@ -37,6 +37,7 @@ import org.apache.spark.sql.catalyst.util.DateTimeConstants.MILLIS_PER_DAY
 import org.apache.spark.sql.catalyst.util.RebaseDateTime.RebaseSpec
 import org.apache.spark.sql.execution.datasources.DataSourceUtils
 import org.apache.spark.sql.internal.SQLConf.LegacyBehaviorPolicy
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 
@@ -190,7 +191,7 @@ private[sql] class AvroDeserializer(
       case (FIXED, BinaryType) => (updater, ordinal, value) =>
         updater.set(ordinal, value.asInstanceOf[GenericFixed].bytes().clone())
 
-      case (BYTES, BinaryType) => (updater, ordinal, value) =>
+      case (BYTES, BinaryType | GeometryUDT) => (updater, ordinal, value) =>
         val bytes = value match {
           case b: ByteBuffer =>
             val bytes = new Array[Byte](b.remaining)
