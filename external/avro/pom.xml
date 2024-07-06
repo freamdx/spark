@@ -80,6 +80,11 @@
       <groupId>org.tukaani</groupId>
       <artifactId>xz</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.sedona</groupId>
+      <artifactId>sedona-spark-shaded-3.0_${scala.binary.version}</artifactId>
+      <version>${sedona.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>

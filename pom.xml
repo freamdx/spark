@@ -211,7 +211,7 @@
     <!-- org.fusesource.leveldbjni will be used except on arm64 platform. -->
     <leveldbjni.group>org.fusesource.leveldbjni</leveldbjni.group>
     <kubernetes-client.version>5.12.2</kubernetes-client.version>
-    <sedona.version>1.5.2</sedona.version>
+    <sedona.version>1.6.0</sedona.version>
 
     <test.java.home>${java.home}</test.java.home>
 
